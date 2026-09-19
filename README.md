@@ -148,7 +148,3 @@ The header summarises the filtered data (number of transactions, branches, citie
 7. **Visualise** — Plotly charts via `charts.py`, rendered in Streamlit
 
 `load_data(path)` returns the cleaned DataFrame together with a data-quality report (original/final rows, duplicates removed, missing values before/after, Sales recalculation flag and mismatch count), which feeds the Data Quality tab.
-
-## Styling
-
-The dashboard uses custom CSS injected from `app.py`: dark metric cards, gradient section headers, colour-coded insight cards, a dark sidebar and blue table headers.
