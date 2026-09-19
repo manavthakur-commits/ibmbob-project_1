@@ -1,0 +1,757 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Supermarket Sales Analytics — Project Report</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #1f2328;
+    background: #f0f4f8;
+  }
+
+  .page {
+    max-width: 820px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 0 0 48px;
+  }
+
+  /* ── Cover ── */
+  .cover {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 60%, #7c3aed 100%);
+    color: white;
+    padding: 56px 48px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::after {
+    content: "";
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .cover-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .cover h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 10px; }
+  .cover h2 { font-size: 1rem; font-weight: 400; opacity: 0.82; margin-bottom: 32px; }
+  .cover-meta { display: flex; gap: 40px; flex-wrap: wrap; }
+  .cover-meta-item { }
+  .cover-meta-item .label { font-size: 10px; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
+  .cover-meta-item .value { font-size: 13px; font-weight: 600; margin-top: 2px; }
+
+  /* ── Body ── */
+  .body { padding: 0 48px; }
+
+  /* ── Section ── */
+  .section { margin-top: 40px; }
+  .section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.05rem; font-weight: 700; color: #1e293b;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 8px; margin-bottom: 18px;
+  }
+  .section-title .icon {
+    background: #2563eb; color: white;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+
+  /* ── KPI Grid ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .kpi-card {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .kpi-card .kpi-label { font-size: 10px; color: #57606a; text-transform: uppercase; letter-spacing: 0.6px; }
+  .kpi-card .kpi-value { font-size: 1.25rem; font-weight: 800; color: #1e293b; margin: 4px 0 2px; }
+  .kpi-card .kpi-sub   { font-size: 10px; color: #3b82d4; }
+  .kpi-grid-2 { grid-template-columns: repeat(5, 1fr); }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 4px; }
+  thead tr { background: #1e3a5f; color: white; }
+  thead th { padding: 9px 12px; text-align: left; font-weight: 600; font-size: 11.5px; }
+  tbody tr:nth-child(even) { background: #f7f8fa; }
+  tbody tr:nth-child(odd)  { background: #ffffff; }
+  tbody td { padding: 8px 12px; border-bottom: 1px solid #e5e7eb; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px; border-radius: 10px;
+    font-size: 10.5px; font-weight: 600;
+  }
+  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge-green  { background: #dcfce7; color: #15803d; }
+  .badge-orange { background: #ffedd5; color: #c2410c; }
+  .badge-purple { background: #ede9fe; color: #6d28d9; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* ── Bar chart (SVG-free, CSS) ── */
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .bar-label { width: 110px; font-size: 11.5px; color: #374151; text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; background: #e5e7eb; border-radius: 4px; height: 18px; overflow: hidden; }
+  .bar-fill  { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 6px; }
+  .bar-fill span { font-size: 10px; color: white; font-weight: 700; white-space: nowrap; }
+
+  /* ── Donut chart (SVG) ── */
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .chart-box {
+    background: #f7f8fa; border: 1px solid #e5e7eb;
+    border-radius: 10px; padding: 18px;
+  }
+  .chart-box h4 { font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 14px; }
+
+  /* ── Insight cards ── */
+  .insight { padding: 12px 14px; border-radius: 8px; margin-bottom: 10px; display: flex; gap: 12px; }
+  .insight-success { background: #f0fdf4; border-left: 4px solid #22c55e; }
+  .insight-warning { background: #fffbeb; border-left: 4px solid #f59e0b; }
+  .insight-info    { background: #eff6ff; border-left: 4px solid #3b82f6; }
+  .insight-icon { font-size: 18px; line-height: 1; margin-top: 1px; }
+  .insight-content { }
+  .insight-title  { font-size: 12.5px; font-weight: 700; color: #1e293b; }
+  .insight-detail { font-size: 11.5px; color: #475569; margin-top: 3px; }
+
+  /* ── Methodology ── */
+  .step-list { counter-reset: steps; }
+  .step {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 12px 0; border-bottom: 1px solid #f1f5f9;
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    background: #2563eb; color: white;
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+  }
+  .step-text strong { font-size: 13px; color: #1e293b; display: block; }
+  .step-text span   { font-size: 12px; color: #57606a; }
+
+  /* ── Tech stack pills ── */
+  .tech-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .pill {
+    background: #1e3a5f; color: white;
+    padding: 5px 14px; border-radius: 20px;
+    font-size: 11.5px; font-weight: 600;
+  }
+
+  /* ── Rating bar ── */
+  .rating-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+  .rating-label { width: 105px; font-size: 11.5px; color: #374151; }
+  .rating-track { flex: 1; background: #e5e7eb; border-radius: 4px; height: 14px; }
+  .rating-fill  { height: 100%; border-radius: 4px; }
+  .rating-val   { width: 36px; font-size: 11.5px; font-weight: 700; color: #1e293b; text-align: right; }
+
+  /* ── Page break hint ── */
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin: 36px 0 0; }
+
+  /* ── Footer ── */
+  .report-footer {
+    text-align: center;
+    padding: 20px 48px 0;
+    font-size: 11px;
+    color: #94a3b8;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="cover">
+    <div class="cover-tag">Data Analytics Project Report</div>
+    <h1>Supermarket Sales<br />Analytics</h1>
+    <h2>End-to-end analysis of 500 transactions across 4 cities &amp; 8 product categories</h2>
+    <div class="cover-meta">
+      <div class="cover-meta-item">
+        <div class="label">Period</div>
+        <div class="value">Jan 2026 — Jul 2026</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="label">Dataset</div>
+        <div class="value">SUPER MARKET DATA.csv</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="label">Records</div>
+        <div class="value">500 Invoices</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="label">Tool</div>
+        <div class="value">Python · Pandas · Streamlit · Plotly</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    
+    <div class="section">
+      <div class="section-title"><div class="icon">1</div> Executive Summary</div>
+      <p style="font-size:13px;color:#374151;line-height:1.75;margin-bottom:14px">
+        This report presents a comprehensive data analytics study of a multi-branch supermarket chain
+        operating across four Indian cities: <strong>Mumbai, Delhi, Bengaluru,</strong> and <strong>Jaipur</strong>.
+        The dataset covers <strong>500 sales transactions</strong> spanning January to July 2026,
+        encompassing 20 products across 8 categories. The analysis addresses data quality validation,
+        sales recalculation, revenue performance, customer segmentation, and actionable business recommendations.
+      </p>
+
+      
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Revenue</div>
+          <div class="kpi-value">₹2,44,411</div>
+          <div class="kpi-sub">6-month period</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Transactions</div>
+          <div class="kpi-value">500</div>
+          <div class="kpi-sub">Unique invoices</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Avg Order Value</div>
+          <div class="kpi-value">₹488.82</div>
+          <div class="kpi-sub">Per transaction</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Units Sold</div>
+          <div class="kpi-value">2,768</div>
+          <div class="kpi-sub">Total quantity</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Avg Rating</div>
+          <div class="kpi-value">3.99</div>
+          <div class="kpi-sub">Out of 5.0</div>
+        </div>
+      </div>
+
+      <div class="kpi-grid" style="margin-top:12px">
+        <div class="kpi-card">
+          <div class="kpi-label">Branches</div>
+          <div class="kpi-value">4</div>
+          <div class="kpi-sub">A · B · C · D</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Cities</div>
+          <div class="kpi-value">4</div>
+          <div class="kpi-sub">Mumbai · Delhi · etc.</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Categories</div>
+          <div class="kpi-value">8</div>
+          <div class="kpi-sub">Product categories</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Products</div>
+          <div class="kpi-value">20</div>
+          <div class="kpi-sub">SKUs tracked</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Best Branch</div>
+          <div class="kpi-value">C</div>
+          <div class="kpi-sub">Mumbai — ₹72,469</div>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="section">
+      <div class="section-title"><div class="icon">2</div> Dataset Overview &amp; Data Quality</div>
+
+      <div class="charts-row" style="margin-bottom:16px">
+        <div class="chart-box">
+          <h4>Dataset Schema — 13 Columns</h4>
+          <table>
+            <thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>Invoice ID</td><td><span class="badge badge-blue">String</span></td><td>Unique transaction ID</td></tr>
+              <tr><td>Date</td><td><span class="badge badge-blue">Date</span></td><td>Transaction date</td></tr>
+              <tr><td>Branch</td><td><span class="badge badge-purple">String</span></td><td>Store branch (A–D)</td></tr>
+              <tr><td>City</td><td><span class="badge badge-purple">String</span></td><td>City name</td></tr>
+              <tr><td>Customer Type</td><td><span class="badge badge-purple">String</span></td><td>Member / Normal</td></tr>
+              <tr><td>Gender</td><td><span class="badge badge-purple">String</span></td><td>Male / Female</td></tr>
+              <tr><td>Product</td><td><span class="badge badge-purple">String</span></td><td>Product name</td></tr>
+              <tr><td>Category</td><td><span class="badge badge-purple">String</span></td><td>Product category</td></tr>
+              <tr><td>Quantity</td><td><span class="badge badge-green">Integer</span></td><td>Units purchased</td></tr>
+              <tr><td>Unit Price</td><td><span class="badge badge-green">Float</span></td><td>Price per unit (₹)</td></tr>
+              <tr><td>Payment</td><td><span class="badge badge-orange">String</span></td><td>Payment method</td></tr>
+              <tr><td>Rating</td><td><span class="badge badge-green">Float</span></td><td>Customer rating (1–5)</td></tr>
+              <tr><td>Sales</td><td><span class="badge badge-green">Float</span></td><td>Qty × Unit Price (₹)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="chart-box">
+          <h4>Data Quality Audit</h4>
+          <table>
+            <thead><tr><th>Check</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td>Total records loaded</td><td><strong>500</strong></td></tr>
+              <tr><td>Missing values (any column)</td><td><span class="badge badge-green">None detected</span></td></tr>
+              <tr><td>Duplicate Invoice IDs</td><td><span class="badge badge-green">0 removed</span></td></tr>
+              <tr><td>Unparseable dates</td><td><span class="badge badge-green">0 rows</span></td></tr>
+              <tr><td>Non-numeric Quantity / Price</td><td><span class="badge badge-green">0 rows</span></td></tr>
+              <tr><td>Sales recalculated (Qty × Price)</td><td><span class="badge badge-blue">Yes — all 500</span></td></tr>
+              <tr><td>Sales mismatch rows (&gt;1% diff)</td><td><span class="badge badge-green">0 rows</span></td></tr>
+              <tr><td>Final clean records</td><td><strong>500</strong></td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:11px;color:#57606a;margin-top:10px">
+            The dataset was clean with no missing or malformed values. Sales values were re-derived
+            as <code>Quantity × Unit Price</code> to ensure self-consistency. No corrections were required.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="section">
+      <div class="section-title"><div class="icon">3</div> Methodology &amp; Project Architecture</div>
+      <div class="step-list">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <strong>Data Collection &amp; Loading</strong>
+            <span>CSV dataset ingested via <code>pandas.read_csv()</code>. All 13 required columns validated before processing proceeds.</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <strong>Data Cleaning &amp; Validation</strong>
+            <span>Missing values audited; key identifier nulls dropped; numeric columns coerced; date column parsed to datetime; duplicates removed on Invoice ID.</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <strong>Sales Recalculation</strong>
+            <span>Sales = Quantity × Unit Price recalculated for every row. Rows differing by &gt;1% from original value flagged and corrected. Zero mismatches found.</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            <strong>Feature Engineering</strong>
+            <span>Derived columns added: Month, Month Name, Day of Week, Quarter — enabling temporal segmentation and trend analysis.</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-text">
+            <strong>Aggregation &amp; KPI Computation</strong>
+            <span>GroupBy operations on Branch, Category, Product, Payment, Gender, Customer Type. Time-series aggregations for monthly and weekly trends.</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-text">
+            <strong>Visualisation &amp; Dashboard</strong>
+            <span>18 Plotly interactive charts embedded in a 7-tab Streamlit dashboard with live sidebar filters (branch, city, category, date range, gender, customer type).</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">7</div>
+          <div class="step-text">
+            <strong>Business Insight Generation</strong>
+            <span>Automated insight engine analyses aggregated results and surfaces 7+ colour-coded recommendations directly in the dashboard.</span>
+          </div>
+        </div>
+      </div>
+      <div class="tech-pills" style="margin-top:16px">
+        <span class="pill">Python 3.13</span>
+        <span class="pill">Pandas 2.x</span>
+        <span class="pill">NumPy 1.26</span>
+        <span class="pill">Plotly 5.x</span>
+        <span class="pill">Streamlit 1.35</span>
+        <span class="pill">CSV / Flat-file data</span>
+      </div>
+    </div>
+
+    
+    <div class="section">
+      <div class="section-title"><div class="icon">4</div> Branch &amp; City Performance</div>
+
+      <table style="margin-bottom:18px">
+        <thead>
+          <tr>
+            <th>Branch</th><th>City</th><th class="num">Total Sales (₹)</th>
+            <th class="num">Transactions</th><th class="num">Avg Order (₹)</th><th class="num">Avg Rating</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>C</strong></td><td>Mumbai</td><td class="num">72,469.45</td><td class="num">143</td><td class="num">506.78</td><td class="num">4.05</td></tr>
+          <tr><td><strong>B</strong></td><td>Delhi</td><td class="num">64,116.26</td><td class="num">133</td><td class="num">482.08</td><td class="num">3.98</td></tr>
+          <tr><td><strong>D</strong></td><td>Bengaluru</td><td class="num">55,468.29</td><td class="num">119</td><td class="num">466.12</td><td class="num">4.09</td></tr>
+          <tr><td><strong>A</strong></td><td>Jaipur</td><td class="num">52,357.08</td><td class="num">105</td><td class="num">498.64</td><td class="num">3.84</td></tr>
+        </tbody>
+      </table>
+
+      
+      <div style="margin-bottom:6px;font-size:11px;color:#57606a;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Revenue share by branch</div>
+      <div class="bar-row">
+        <div class="bar-label">C — Mumbai</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#2563eb"><span>₹72,469 · 29.6%</span></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">B — Delhi</div>
+        <div class="bar-track"><div class="bar-fill" style="width:88.5%;background:#3b82f6"><span>₹64,116 · 26.2%</span></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">D — Bengaluru</div>
+        <div class="bar-track"><div class="bar-fill" style="width:76.5%;background:#60a5fa"><span>₹55,468 · 22.7%</span></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">A — Jaipur</div>
+        <div class="bar-track"><div class="bar-fill" style="width:72.2%;background:#93c5fd"><span>₹52,357 · 21.4%</span></div></div>
+      </div>
+
+      <p style="font-size:12px;color:#57606a;margin-top:12px">
+        <strong>Branch C (Mumbai)</strong> leads with ₹72,469 (29.6% of total revenue) and the highest transaction count (143).
+        Despite having the fewest transactions, <strong>Branch D (Bengaluru)</strong> records the best average customer rating (4.09),
+        signalling high satisfaction. <strong>Branch A (Jaipur)</strong> has the lowest footfall and revenue — a priority area for improvement.
+      </p>
+    </div>
+
+    
+    <div class="section">
+      <div class="section-title"><div class="icon">5</div> Product Category Analysis</div>
+
+      <table style="margin-bottom:18px">
+        <thead>
+          <tr>
+            <th>Category</th><th class="num">Total Sales (₹)</th><th class="num">Units Sold</th>
+            <th class="num">Transactions</th><th class="num">Avg Unit Price (₹)</th><th class="num">Avg Rating</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Beverages</td><td class="num">56,108.24</td><td class="num">465</td><td class="num">82</td><td class="num">118.38</td><td class="num">3.96</td></tr>
+          <tr><td>Personal Care</td><td class="num">45,943.96</td><td class="num">399</td><td class="num">73</td><td class="num">113.86</td><td class="num">3.95</td></tr>
+          <tr><td>Dairy</td><td class="num">43,992.00</td><td class="num">345</td><td class="num">68</td><td class="num">128.85</td><td class="num">4.03</td></tr>
+          <tr><td>Grocery</td><td class="num">40,470.47</td><td class="num">439</td><td class="num">82</td><td class="num">90.74</td><td class="num">3.94</td></tr>
+          <tr><td>Fruits</td><td class="num">23,263.17</td><td class="num">223</td><td class="num">44</td><td class="num">97.12</td><td class="num">3.83</td></tr>
+          <tr><td>Snacks</td><td class="num">16,992.97</td><td class="num">443</td><td class="num">75</td><td class="num">37.66</td><td class="num">4.11</td></tr>
+          <tr><td>Vegetables</td><td class="num">11,124.17</td><td class="num">290</td><td class="num">48</td><td class="num">39.45</td><td class="num">3.99</td></tr>
+          <tr><td>Bakery</td><td class="num">6,516.10</td><td class="num">164</td><td class="num">28</td><td class="num">39.90</td><td class="num">4.24</td></tr>
+        </tbody>
+      </table>
+
+      
+      <div style="margin-bottom:6px;font-size:11px;color:#57606a;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Revenue contribution by category</div>
+      <div class="bar-row"><div class="bar-label">Beverages</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#7c3aed"><span>23.0%</span></div></div></div>
+      <div class="bar-row"><div class="bar-label">Personal Care</div><div class="bar-track"><div class="bar-fill" style="width:81.9%;background:#8b5cf6"><span>18.8%</span></div></div></div>
+      <div class="bar-row"><div class="bar-label">Dairy</div><div class="bar-track"><div class="bar-fill" style="width:78.4%;background:#a78bfa"><span>18.0%</span></div></div></div>
+      <div class="bar-row"><div class="bar-label">Grocery</div><div class="bar-track"><div class="bar-fill" style="width:72.1%;background:#c4b5fd"><span>16.6%</span></div></div></div>
+      <div class="bar-row"><div class="bar-label">Fruits</div><div class="bar-track"><div class="bar-fill" style="width:41.5%;background:#ddd6fe"><span style="color:#6d28d9">9.5%</span></div></div></div>
+      <div class="bar-row"><div class="bar-label">Snacks</div><div class="bar-track"><div class="bar-fill" style="width:30.3%;background:#ede9fe"><span style="color:#6d28d9">6.9%</span></div></div></div>
+      <div class="bar-row"><div class="bar-label">Vegetables</div><div class="bar-track"><div class="bar-fill" style="width:19.8%;background:#f5f3ff"><span style="color:#6d28d9">4.6%</span></div></div></div>
+      <div class="bar-row"><div class="bar-label">Bakery</div><div class="bar-track"><div class="bar-fill" style="width:11.6%;background:#faf5ff"><span style="color:#6d28d9">2.7%</span></div></div></div>
+
+      <p style="font-size:12px;color:#57606a;margin-top:12px">
+        <strong>Beverages</strong> is the top revenue driver (₹56,108 | 23%), followed closely by
+        <strong>Personal Care</strong> and <strong>Dairy</strong>. Notably, <strong>Snacks</strong>
+        sells 443 units but generates only ₹16,993 — reflecting its very low average unit price (₹37.66).
+        <strong>Bakery</strong> has the fewest transactions (28) yet earns the highest average customer rating (4.24),
+        suggesting room for expansion.
+      </p>
+    </div>
+
+    
+    <div class="section">
+      <div class="section-title"><div class="icon">6</div> Top Products by Revenue</div>
+
+      <table>
+        <thead>
+          <tr><th>Rank</th><th>Product</th><th>Category</th><th class="num">Total Sales (₹)</th><th class="num">Units Sold</th><th class="num">Transactions</th><th class="num">Avg Rating</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td><strong>Cheese</strong></td><td><span class="badge badge-purple">Dairy</span></td><td class="num">27,906.30</td><td class="num">126</td><td class="num">26</td><td class="num">3.98</td></tr>
+          <tr><td>2</td><td><strong>Coffee</strong></td><td><span class="badge badge-orange">Beverages</span></td><td class="num">27,694.87</td><td class="num">153</td><td class="num">24</td><td class="num">3.86</td></tr>
+          <tr><td>3</td><td><strong>Shampoo</strong></td><td><span class="badge badge-blue">Personal Care</span></td><td class="num">27,497.48</td><td class="num">152</td><td class="num">27</td><td class="num">3.92</td></tr>
+          <tr><td>4</td><td><strong>Cooking Oil</strong></td><td><span class="badge badge-green">Grocery</span></td><td class="num">21,525.06</td><td class="num">142</td><td class="num">26</td><td class="num">3.97</td></tr>
+          <tr><td>5</td><td><strong>Tea</strong></td><td><span class="badge badge-orange">Beverages</span></td><td class="num">17,681.59</td><td class="num">146</td><td class="num">29</td><td class="num">4.02</td></tr>
+          <tr><td>6</td><td><strong>Shampoo (PC)</strong></td><td><span class="badge badge-blue">Personal Care</span></td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="num">–</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:#57606a;margin-top:10px">
+        <strong>Cheese, Coffee,</strong> and <strong>Shampoo</strong> form a near-equal top-3 cluster, each generating ~₹27,500.
+        These three products alone account for approximately <strong>34%</strong> of total revenue. Maintaining consistent stock
+        levels for these items is critical.
+      </p>
+    </div>
+
+    
+    <div class="section">
+      <div class="section-title"><div class="icon">7</div> Sales Trends Over Time</div>
+
+      <div class="charts-row">
+        <div class="chart-box">
+          <h4>Monthly Revenue</h4>
+          <table>
+            <thead><tr><th>Month</th><th class="num">Sales (₹)</th><th class="num">Transactions</th></tr></thead>
+            <tbody>
+              <tr><td>January 2026</td><td class="num">43,415.53</td><td class="num">88</td></tr>
+              <tr><td>February 2026</td><td class="num">30,068.15</td><td class="num">65</td></tr>
+              <tr><td>March 2026</td><td class="num">37,306.42</td><td class="num">83</td></tr>
+              <tr><td>April 2026</td><td class="num"><strong>52,569.77</strong></td><td class="num">90</td></tr>
+              <tr><td>May 2026</td><td class="num">42,542.31</td><td class="num">85</td></tr>
+              <tr><td>June 2026</td><td class="num">35,041.46</td><td class="num">82</td></tr>
+              <tr><td>July 2026*</td><td class="num">3,467.44</td><td class="num">7</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:10.5px;color:#94a3b8;margin-top:6px">*July partial data only (1 day)</p>
+        </div>
+        <div class="chart-box">
+          <h4>Sales by Day of Week</h4>
+          <div style="margin-top:8px">
+            <div class="bar-row"><div class="bar-label" style="width:90px">Monday</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#2563eb"><span>₹42,602</span></div></div></div>
+            <div class="bar-row"><div class="bar-label" style="width:90px">Sunday</div><div class="bar-track"><div class="bar-fill" style="width:86.2%;background:#3b82f6"><span>₹36,720</span></div></div></div>
+            <div class="bar-row"><div class="bar-label" style="width:90px">Tuesday</div><div class="bar-track"><div class="bar-fill" style="width:85.2%;background:#60a5fa"><span>₹36,293</span></div></div></div>
+            <div class="bar-row"><div class="bar-label" style="width:90px">Wednesday</div><div class="bar-track"><div class="bar-fill" style="width:80.7%;background:#93c5fd"><span>₹34,364</span></div></div></div>
+            <div class="bar-row"><div class="bar-label" style="width:90px">Friday</div><div class="bar-track"><div class="bar-fill" style="width:77.5%;background:#bfdbfe"><span style="color:#1e40af">₹33,026</span></div></div></div>
+            <div class="bar-row"><div class="bar-label" style="width:90px">Saturday</div><div class="bar-track"><div class="bar-fill" style="width:77.1%;background:#dbeafe"><span style="color:#1e40af">₹32,829</span></div></div></div>
+            <div class="bar-row"><div class="bar-label" style="width:90px">Thursday</div><div class="bar-track"><div class="bar-fill" style="width:67.1%;background:#eff6ff"><span style="color:#1e40af">₹28,576</span></div></div></div>
+          </div>
+          <p style="font-size:10.5px;color:#57606a;margin-top:8px">
+            Monday is the peak sales day (₹42,602). Sunday has the highest avg order value (₹601.97).
+            Thursday is the slowest day — ideal for promotions.
+          </p>
+        </div>
+      </div>
+
+      <p style="font-size:12px;color:#57606a;margin-top:14px">
+        <strong>April 2026</strong> recorded peak monthly revenue (₹52,570) with 90 transactions.
+        February shows a notable dip to ₹30,068 — investigate seasonal factors or restocking issues.
+        The trend from Feb → Apr shows strong recovery (+75%), followed by gradual softening through June.
+      </p>
+    </div>
+
+    
+    <div class="section">
+      <div class="section-title"><div class="icon">8</div> Customer Segmentation</div>
+
+      <div class="charts-row" style="margin-bottom:16px">
+        <div class="chart-box">
+          <h4>By Gender</h4>
+          <table>
+            <thead><tr><th>Gender</th><th class="num">Total Sales (₹)</th><th class="num">Txns</th><th class="num">Avg Order</th><th class="num">Avg Rating</th></tr></thead>
+            <tbody>
+              <tr><td>Female</td><td class="num">1,23,954.12</td><td class="num">255</td><td class="num">486.09</td><td class="num">4.01</td></tr>
+              <tr><td>Male</td><td class="num">1,20,456.96</td><td class="num">245</td><td class="num">491.66</td><td class="num">3.98</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:11px;color:#57606a;margin-top:8px">
+            Near-equal gender split. Female customers are slightly more numerous (51%) but male customers
+            have a marginally higher average order value (₹491.66 vs ₹486.09).
+          </p>
+        </div>
+        <div class="chart-box">
+          <h4>By Customer Type</h4>
+          <table>
+            <thead><tr><th>Type</th><th class="num">Total Sales (₹)</th><th class="num">Txns</th><th class="num">Avg Order</th><th class="num">Avg Rating</th></tr></thead>
+            <tbody>
+              <tr><td>Member</td><td class="num">1,43,009.30</td><td class="num">296</td><td class="num">483.14</td><td class="num">4.01</td></tr>
+              <tr><td>Normal</td><td class="num">1,01,401.78</td><td class="num">204</td><td class="num">497.07</td><td class="num">3.97</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:11px;color:#57606a;margin-top:8px">
+            Members account for <strong>58.5%</strong> of revenue and <strong>59.2%</strong> of transactions —
+            a strong loyalty programme. Interestingly, Normal customers have a higher avg order value (₹497 vs ₹483).
+          </p>
+        </div>
+      </div>
+
+      
+      <div class="chart-box" style="background:#f7f8fa;border:1px solid #e5e7eb;border-radius:10px;padding:18px">
+        <h4 style="font-size:12px;font-weight:700;color:#374151;margin-bottom:14px">Payment Method Preferences</h4>
+        <table>
+          <thead><tr><th>Method</th><th class="num">Total Sales (₹)</th><th class="num">Transactions</th><th class="num">Share</th><th class="num">Avg Order (₹)</th></tr></thead>
+          <tbody>
+            <tr><td>UPI</td><td class="num">67,910.33</td><td class="num">127</td><td class="num">25.4%</td><td class="num">534.73</td></tr>
+            <tr><td>Net Banking</td><td class="num">65,194.93</td><td class="num">126</td><td class="num">25.2%</td><td class="num">517.42</td></tr>
+            <tr><td>Card</td><td class="num">57,265.64</td><td class="num">125</td><td class="num">25.0%</td><td class="num">458.13</td></tr>
+            <tr><td>Cash</td><td class="num">54,040.18</td><td class="num">122</td><td class="num">24.4%</td><td class="num">442.95</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:11px;color:#57606a;margin-top:8px">
+          All four payment methods are almost equally adopted (24–25% share each) — a sign of good payment infrastructure.
+          UPI leads in both transaction count and average order value (₹534.73), confirming its dominance in India's digital payment ecosystem.
+        </p>
+      </div>
+    </div>
+
+    
+    <div class="section">
+      <div class="section-title"><div class="icon">9</div> Customer Satisfaction &amp; Ratings</div>
+
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;color:#57606a;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Average Rating by Category (out of 5.0)</div>
+        <div class="rating-row"><div class="rating-label">Bakery</div><div class="rating-track"><div class="rating-fill" style="width:84.8%;background:#22c55e"></div></div><div class="rating-val">4.24</div></div>
+        <div class="rating-row"><div class="rating-label">Snacks</div><div class="rating-track"><div class="rating-fill" style="width:82.2%;background:#22c55e"></div></div><div class="rating-val">4.11</div></div>
+        <div class="rating-row"><div class="rating-label">Dairy</div><div class="rating-track"><div class="rating-fill" style="width:80.6%;background:#4ade80"></div></div><div class="rating-val">4.03</div></div>
+        <div class="rating-row"><div class="rating-label">Vegetables</div><div class="rating-track"><div class="rating-fill" style="width:79.8%;background:#4ade80"></div></div><div class="rating-val">3.99</div></div>
+        <div class="rating-row"><div class="rating-label">Beverages</div><div class="rating-track"><div class="rating-fill" style="width:79.2%;background:#facc15"></div></div><div class="rating-val">3.96</div></div>
+        <div class="rating-row"><div class="rating-label">Personal Care</div><div class="rating-track"><div class="rating-fill" style="width:79.0%;background:#facc15"></div></div><div class="rating-val">3.95</div></div>
+        <div class="rating-row"><div class="rating-label">Grocery</div><div class="rating-track"><div class="rating-fill" style="width:78.8%;background:#facc15"></div></div><div class="rating-val">3.94</div></div>
+        <div class="rating-row"><div class="rating-label">Fruits</div><div class="rating-track"><div class="rating-fill" style="width:76.6%;background:#fb923c"></div></div><div class="rating-val">3.83</div></div>
+      </div>
+
+      <p style="font-size:12px;color:#57606a">
+        Overall customer satisfaction is <strong>good</strong> — all categories score between 3.83 and 4.24.
+        <strong>Bakery</strong> is the clear satisfaction leader (4.24). <strong>Fruits</strong> is the only
+        category below 3.9 (3.83), indicating quality or freshness issues worth addressing.
+        The overall store average of <strong>3.99/5</strong> is a healthy benchmark.
+      </p>
+    </div>
+
+    
+    <div class="section">
+      <div class="section-title"><div class="icon">10</div> Business Insights &amp; Recommendations</div>
+
+      <div class="insight insight-success">
+        <div class="insight-icon">🏆</div>
+        <div class="insight-content">
+          <div class="insight-title">Top Revenue Category: Beverages</div>
+          <div class="insight-detail">Generated ₹56,108 (23% of revenue). Maintain strong stock levels and explore premium SKUs (cold brew, specialty teas) to sustain leadership.</div>
+        </div>
+      </div>
+
+      <div class="insight insight-success">
+        <div class="insight-icon">📍</div>
+        <div class="insight-content">
+          <div class="insight-title">Top Branch: Branch C — Mumbai (₹72,469)</div>
+          <div class="insight-detail">Leads in revenue and transaction count. Document its store layout, staffing, and promotional strategies and replicate across Branches A and D.</div>
+        </div>
+      </div>
+
+      <div class="insight insight-success">
+        <div class="insight-icon">🛒</div>
+        <div class="insight-content">
+          <div class="insight-title">Best-Selling Product: Cheese (₹27,906)</div>
+          <div class="insight-detail">Cheese, Coffee, and Shampoo are near-equal top-3 products contributing ~34% of total revenue. Ensure these are always in stock, especially at Branch C.</div>
+        </div>
+      </div>
+
+      <div class="insight insight-warning">
+        <div class="insight-icon">📉</div>
+        <div class="insight-content">
+          <div class="insight-title">Lowest Revenue Category: Bakery (₹6,516)</div>
+          <div class="insight-detail">Despite the highest customer rating (4.24), Bakery contributes only 2.7% of revenue with just 28 transactions. Increase product range, visibility, and run combo offers to grow footfall in this segment.</div>
+        </div>
+      </div>
+
+      <div class="insight insight-warning">
+        <div class="insight-icon">🍎</div>
+        <div class="insight-content">
+          <div class="insight-title">Fruits Category: Low Rating Alert (3.83)</div>
+          <div class="insight-detail">Fruits is the only category below 3.9. Investigate freshness, supplier quality, and storage conditions. A targeted quality improvement can directly boost repeat purchases.</div>
+        </div>
+      </div>
+
+      <div class="insight insight-warning">
+        <div class="insight-icon">📅</div>
+        <div class="insight-content">
+          <div class="insight-title">February Dip: ₹30,068 (lowest month)</div>
+          <div class="insight-detail">February recorded 30% lower revenue than January. Investigate supply chain disruptions or seasonal demand drops. Run February-specific promotions proactively next year.</div>
+        </div>
+      </div>
+
+      <div class="insight insight-info">
+        <div class="insight-icon">💳</div>
+        <div class="insight-content">
+          <div class="insight-title">UPI is the Preferred Payment Method</div>
+          <div class="insight-detail">UPI leads with ₹67,910 and the highest avg order value (₹534.73). Ensure UPI checkout is frictionless and consider UPI-exclusive cashback offers to drive larger basket sizes.</div>
+        </div>
+      </div>
+
+      <div class="insight insight-info">
+        <div class="insight-icon">👥</div>
+        <div class="insight-content">
+          <div class="insight-title">Strong Loyalty Programme — Members: 58.5% of Revenue</div>
+          <div class="insight-detail">Members drive ₹1,43,009 (58.5%) of total revenue. Grow the membership base — even a 10% increase in Normal → Member conversion would add ~₹10,000 in incremental revenue.</div>
+        </div>
+      </div>
+
+      <div class="insight insight-info">
+        <div class="insight-icon">📅</div>
+        <div class="insight-content">
+          <div class="insight-title">Peak Day: Monday | High-Value Day: Sunday</div>
+          <div class="insight-detail">Monday generates the highest daily sales (₹42,602). Sunday customers spend the most per visit (₹601.97 avg order). Staff adequately on both days; consider targeted weekend bundles.</div>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="section">
+      <div class="section-title"><div class="icon">11</div> Dashboard — Features &amp; Tabs</div>
+      <table>
+        <thead><tr><th>Tab</th><th>Contents</th></tr></thead>
+        <tbody>
+          <tr><td>📊 Overview</td><td>10 KPI metric cards, branch/category bar &amp; pie charts, business insight cards</td></tr>
+          <tr><td>📅 Time Trends</td><td>Monthly revenue line chart, day-of-week bar, category timeline, summary tables</td></tr>
+          <tr><td>🛍️ Products &amp; Categories</td><td>Top-N products bar, branch × category heatmap, quantity vs. sales scatter with trendline, unit-price box plots</td></tr>
+          <tr><td>👥 Customer Analysis</td><td>Gender × category grouped bars, member vs. normal, payment method breakdown</td></tr>
+          <tr><td>⭐ Ratings</td><td>Avg rating bars with error bands, distribution histogram, box plot, per-category gauge cards</td></tr>
+          <tr><td>📋 Raw Data</td><td>Live search (by Invoice / Product / City), formatted table, CSV download button</td></tr>
+          <tr><td>🔎 Data Quality</td><td>Missing-value audit, Sales recalculation report, schema table, descriptive statistics</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:#57606a;margin-top:12px">
+        The dashboard includes a <strong>full sidebar filter panel</strong> (Branch, City, Category, Customer Type, Gender, Date Range)
+        and supports uploading any compatible CSV file — making it reusable for future datasets.
+        Run with: <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:11px">streamlit run supermarket_analytics/app.py</code>
+      </p>
+    </div>
+
+    
+    <div class="section">
+      <div class="section-title"><div class="icon">12</div> Conclusion</div>
+      <p style="font-size:13px;color:#374151;line-height:1.8">
+        This project successfully demonstrates an end-to-end data analytics pipeline for supermarket sales data.
+        Starting from raw CSV ingestion, through data cleaning, feature engineering, and aggregation,
+        to an interactive multi-tab Streamlit dashboard with 18 Plotly visualisations — the system
+        provides actionable visibility into every dimension of business performance.
+      </p>
+      <p style="font-size:13px;color:#374151;line-height:1.8;margin-top:10px">
+        Key findings confirm that <strong>Beverages, Personal Care, and Dairy</strong> are the revenue pillars;
+        <strong>Branch C (Mumbai)</strong> is the performance leader; the loyalty programme is functioning well
+        (58.5% member revenue share); and overall customer satisfaction (3.99/5) is healthy — with
+        targeted improvement needed in <strong>Fruits</strong> and <strong>Bakery visibility</strong>.
+      </p>
+      <p style="font-size:13px;color:#374151;line-height:1.8;margin-top:10px">
+        With the reusable dashboard in place, business stakeholders can now self-serve insights,
+        apply live filters, and download custom reports — reducing the analytics turnaround from days to seconds.
+      </p>
+    </div>
+
+  </div>
+
+  <div class="report-footer">
+    <p>Supermarket Sales Analytics Report  |  Dataset: SUPER MARKET DATA.csv  |  Period: Jan–Jul 2026  |  Records: 500</p>
+    <p style="margin-top:4px">Made with IBM Bob</p>
+  </div>
+
+</div>
+</body>
+</html>
